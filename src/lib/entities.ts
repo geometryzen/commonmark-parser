@@ -31,7 +31,7 @@ function decodeCodePoint(codePoint: number) {
 }
 
 function getReplacer(map: { [key: string]: string }) {
-    return function replace(str: string) {
+    return function (str: string) {
         if (str.charAt(1) === "#") {
             if (str.charAt(2) === "X" || str.charAt(2) === "x") {
                 return decodeCodePoint(parseInt(str.substr(3), 16));

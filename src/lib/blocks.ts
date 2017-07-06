@@ -549,8 +549,8 @@ export class Parser {
     currentLine: string;
     refmap: { [label: string]: Reference };
     blank: boolean;
-    private blocks: { [type: string]: Block };
-    private blockStarts: BlockStart[];
+    private readonly blocks: { [type: string]: Block };
+    private readonly blockStarts: BlockStart[];
     partiallyConsumedTab: boolean;
     allClosed: boolean;
     indent: number;
@@ -560,6 +560,8 @@ export class Parser {
     constructor(options: ParserOptions = {}) {
         this.inlineParser = new InlineParser(options);
         this.options = options;
+        this.blocks = blocks;
+        this.blockStarts = blockStarts;
     }
     // The main parsing function.  Returns a parsed document AST.
     parse(input: string): Node {
@@ -572,7 +574,6 @@ export class Parser {
         this.column = 0;
         this.lastMatchedContainer = this.doc;
         this.currentLine = "";
-        this.blockStarts = blockStarts;
         // if (this.options.time) { console.time("preparing input"); }
         const lines = input.split(reLineEnding);
         let len = lines.length;

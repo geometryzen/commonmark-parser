@@ -38,37 +38,30 @@ export declare class InlineParser {
     /**
      * Parse string content in block into inline children,
      * using refmap to resolve references.
-     * @param block
      */
     parseInlines(block: Node): void;
     /**
      * Parse the next inline element in subject, advancing subject position.
      * On success, add the result to block's children and return true.
      * On failure, return false.
-     * @param block
      */
     parseInline(block: Node): boolean;
     /**
      * Parse a newline.  If it was preceded by two spaces, return a hard
      * line break; otherwise a soft line break.
-     * @param block
      */
     parseNewline(block: Node): boolean;
     /**
      * Parse a run of ordinary characters, or a single character with
      * a special meaning in markdown, as a plain string.
-     * @param block
      */
     parseString(block: Node): boolean;
     /**
      * Attempt to parse an entity.
-     * @param block
      */
     parseEntity(block: Node): boolean;
     /**
      * Attempt to parse a link reference, modifying refmap.
-     * @param s
-     * @param refmap
      */
     parseReference(s: string, refmap: {
         [label: string]: Reference;

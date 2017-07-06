@@ -126,7 +126,6 @@ export class InlineParser {
     /**
      * Parse string content in block into inline children,
      * using refmap to resolve references.
-     * @param block 
      */
     parseInlines(block: Node): void {
         this.subject = block._string_content.trim();
@@ -144,7 +143,6 @@ export class InlineParser {
      * Parse the next inline element in subject, advancing subject position.
      * On success, add the result to block's children and return true.
      * On failure, return false.
-     * @param block 
      */
     parseInline(block: Node) {
         let res = false;
@@ -199,7 +197,6 @@ export class InlineParser {
     /**
      * Parse a newline.  If it was preceded by two spaces, return a hard
      * line break; otherwise a soft line break.
-     * @param block 
      */
     parseNewline(block: Node) {
         this.pos += 1; // assume we're at a \n
@@ -220,7 +217,6 @@ export class InlineParser {
     /**
      * Parse a run of ordinary characters, or a single character with
      * a special meaning in markdown, as a plain string.
-     * @param block 
      */
     parseString(block: Node) {
         let m: string;
@@ -248,31 +244,30 @@ export class InlineParser {
                 block.appendChild(text(m));
             }
             return true;
-        } else {
+        }
+        else {
             return false;
         }
     }
     /**
      * Attempt to parse an entity.
-     * @param block 
      */
-    parseEntity(block: Node) {
+    parseEntity(block: Node): boolean {
         let m: string;
         if ((m = this.match(reEntityHere))) {
             // decodeHTML comes from the entities library.
             block.appendChild(text(decodeHTML(m)));
             return true;
-        } else {
+        }
+        else {
             return false;
         }
     }
 
     /**
      * Attempt to parse a link reference, modifying refmap.
-     * @param s 
-     * @param refmap 
      */
-    parseReference(s: string, refmap: { [label: string]: Reference }) {
+    parseReference(s: string, refmap: { [label: string]: Reference }): number {
         this.subject = s;
         this.pos = 0;
         let rawlabel;
@@ -351,11 +346,12 @@ export class InlineParser {
     }
     // If re matches at current position in the subject, advance
     // position in subject and return the match; otherwise return null.
-    match(re: RegExp) {
+    match(re: RegExp): string {
         const m = re.exec(this.subject.slice(this.pos));
         if (m === null) {
             return null;
-        } else {
+        }
+        else {
             this.pos += m.index + m[0].length;
             return m[0];
         }
@@ -366,13 +362,14 @@ export class InlineParser {
     peek(): number {
         if (this.pos < this.subject.length) {
             return this.subject.charCodeAt(this.pos);
-        } else {
+        }
+        else {
             return -1;
         }
     }
 
     // Parse zero or more space characters, including at most one newline
-    spnl() {
+    spnl(): boolean/**/ {
         this.match(reSpnl);
         return true;
     }
@@ -383,7 +380,7 @@ export class InlineParser {
 
     // Attempt to parse backticks, adding either a backtick code span or a
     // literal sequence of backticks.
-    parseBackticks(block: Node) {
+    parseBackticks(block: Node): boolean {
         const ticks = this.match(reTicksHere);
         if (ticks === null) {
             return false;

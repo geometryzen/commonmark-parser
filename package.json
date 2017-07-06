@@ -1,7 +1,7 @@
 {
-  "name": "davinci-csv",
+  "name": "commonmark-parser",
   "version": "0.9.12",
-  "description": "Comma Separated Value (CSV) Library for JavaScript with TypeScript d.ts files.",
+  "description": "CommonMark Markdown parser in TypeScript.",
   "author": {
     "name": "David Holmes",
     "email": "david.geo.holmes@gmail.com"
@@ -12,22 +12,22 @@
   "types": "./build/module/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "git://github.com/geometryzen/davinci-csv.git"
+    "url": "git://github.com/geometryzen/commonmark-parser.git"
   },
   "bugs": {
-    "url": "https://github.com/geometryzen/davinci-csv/issues"
+    "url": "https://github.com/geometryzen/commonmark-parser/issues"
   },
   "license": "MIT",
   "licenses": [
     {
       "type": "MIT",
-      "url": "https://github.com/geometryzen/davinci-csv/blob/master/LICENSE"
+      "url": "https://github.com/geometryzen/commonmark-parser/blob/master/LICENSE"
     }
   ],
   "scripts": {
     "info": "npm-scripts-info",
     "build": "trash build && tsc -p tsconfig.main.json && tsc -p tsconfig.module.json && yarn build:browser",
-    "build:browser": "rollup --config rollup.config.js --format umd --name 'CSV' --output build/browser/index.js && sorcery -i build/browser/index.js && cp src/index.d.ts build/browser",
+    "build:browser": "rollup --config rollup.config.js --format umd --name 'commonmarkParser' --output build/browser/index.js && sorcery -i build/browser/index.js && cp src/index.d.ts build/browser",
     "lint": "tslint src/**/*.ts",
     "unit": "trash test && tsc -p tsconfig.json && karma start",
     "test": "yarn lint && yarn unit && nyc check-coverage --lines 40 --functions 30 --branches 20",

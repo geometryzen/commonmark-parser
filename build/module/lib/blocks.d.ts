@@ -20,8 +20,8 @@ export declare class Parser {
         [label: string]: Reference;
     };
     blank: boolean;
-    private blocks;
-    private blockStarts;
+    private readonly blocks;
+    private readonly blockStarts;
     partiallyConsumedTab: boolean;
     allClosed: boolean;
     indent: number;

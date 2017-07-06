@@ -31,10 +31,10 @@ const map: { [key: string]: string } = { 'A': 'a', 'B': 'b', 'C': 'c', 'D': 'd',
 
 // Normalize reference label: collapse internal whitespace
 // to single space, remove leading/trailing whitespace, case fold.
-export function normalizeReference(s: string) {
+export function normalizeReference(s: string): string {
     return s.slice(1, s.length - 1).trim().replace(regex, function ($0) {
         // Note: there is no need to check `hasOwnProperty($0)` here.
         // If character not found in lookup table, it must be whitespace.
         return map[$0] || ' ';
     });
-};
+}

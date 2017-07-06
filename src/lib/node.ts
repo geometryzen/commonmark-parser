@@ -9,6 +9,8 @@ export interface ListData {
     markerOffset?: number;
 }
 
+export type SourcePos = [[number, number], [number, number]];
+
 export class Node {
     private _type: string;
     private _parent: Node;
@@ -16,7 +18,7 @@ export class Node {
     private _lastChild: Node;
     private _prev: Node;
     private _next: Node;
-    private _sourcepos: any;
+    private _sourcepos: SourcePos;
     public _lastLineBlank: boolean;
     public open: boolean;
     public _string_content: string;
@@ -33,7 +35,7 @@ export class Node {
     private _onEnter: any;
     private _onExit: any;
     public htmlBlockType: number;
-    constructor(nodeType: string, sourcepos?: [[number, number], [number, number]]) {
+    constructor(nodeType: string, sourcepos?: SourcePos) {
         this._type = nodeType;
         this._parent = null;
         this._firstChild = null;
@@ -238,13 +240,10 @@ export class Node {
     }
 }
 
-/*
-export class Document extends Node {
-    constructor() {
-        super('document', [[1, 1], [0, 0]]);
-    }
+export interface NodeWalkerEvent {
+    entering: boolean;
+    node: Node;
 }
-*/
 
 /* Example of use of walker:
 
@@ -264,7 +263,7 @@ export class NodeWalker {
         this.current = root;
         this.root = root;
     }
-    next() {
+    next(): NodeWalkerEvent {
         const cur = this.current;
         const entering = this.entering;
 

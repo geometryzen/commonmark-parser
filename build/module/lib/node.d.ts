@@ -7,6 +7,7 @@ export interface ListData {
     padding?: any;
     markerOffset?: number;
 }
+export declare type SourcePos = [[number, number], [number, number]];
 export declare class Node {
     private _type;
     private _parent;
@@ -31,7 +32,7 @@ export declare class Node {
     private _onEnter;
     private _onExit;
     htmlBlockType: number;
-    constructor(nodeType: string, sourcepos?: [[number, number], [number, number]]);
+    constructor(nodeType: string, sourcepos?: SourcePos);
     readonly isContainer: boolean;
     readonly type: string;
     readonly firstChild: Node;
@@ -58,14 +59,15 @@ export declare class Node {
     insertBefore(sibling: Node): void;
     walker(): NodeWalker;
 }
+export interface NodeWalkerEvent {
+    entering: boolean;
+    node: Node;
+}
 export declare class NodeWalker {
     current: Node;
     root: Node;
     entering: boolean;
     constructor(root: Node);
-    next(): {
-        entering: boolean;
-        node: Node;
-    };
+    next(): NodeWalkerEvent;
     resumeAt(node: Node, entering: boolean): void;
 }

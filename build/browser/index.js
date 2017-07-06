@@ -1,7 +1,7 @@
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
 	typeof define === 'function' && define.amd ? define(['exports'], factory) :
-	(factory((global.CSV = global.CSV || {})));
+	(factory((global.commonmarkParser = global.commonmarkParser || {})));
 }(this, (function (exports) { 'use strict';
 
 var Node = (function () {
@@ -286,13 +286,6 @@ var Node = (function () {
     };
     return Node;
 }());
-/*
-export class Document extends Node {
-    constructor() {
-        super('document', [[1, 1], [0, 0]]);
-    }
-}
-*/
 /* Example of use of walker:
 
  var walker = w.walker();
@@ -537,7 +530,7 @@ function decodeCodePoint(codePoint) {
     return output;
 }
 function getReplacer(map) {
-    return function replace(str) {
+    return function (str) {
         if (str.charAt(1) === "#") {
             if (str.charAt(2) === "X" || str.charAt(2) === "x") {
                 return decodeCodePoint(parseInt(str.substr(3), 16));
@@ -719,7 +712,6 @@ var InlineParser = (function () {
     /**
      * Parse string content in block into inline children,
      * using refmap to resolve references.
-     * @param block
      */
     InlineParser.prototype.parseInlines = function (block) {
         this.subject = block._string_content.trim();
@@ -736,7 +728,6 @@ var InlineParser = (function () {
      * Parse the next inline element in subject, advancing subject position.
      * On success, add the result to block's children and return true.
      * On failure, return false.
-     * @param block
      */
     InlineParser.prototype.parseInline = function (block) {
         var res = false;
@@ -790,7 +781,6 @@ var InlineParser = (function () {
     /**
      * Parse a newline.  If it was preceded by two spaces, return a hard
      * line break; otherwise a soft line break.
-     * @param block
      */
     InlineParser.prototype.parseNewline = function (block) {
         this.pos += 1; // assume we're at a \n
@@ -810,7 +800,6 @@ var InlineParser = (function () {
     /**
      * Parse a run of ordinary characters, or a single character with
      * a special meaning in markdown, as a plain string.
-     * @param block
      */
     InlineParser.prototype.parseString = function (block) {
         var m;
@@ -848,7 +837,6 @@ var InlineParser = (function () {
     };
     /**
      * Attempt to parse an entity.
-     * @param block
      */
     InlineParser.prototype.parseEntity = function (block) {
         var m;
@@ -863,8 +851,6 @@ var InlineParser = (function () {
     };
     /**
      * Attempt to parse a link reference, modifying refmap.
-     * @param s
-     * @param refmap
      */
     InlineParser.prototype.parseReference = function (s, refmap) {
         this.subject = s;
@@ -2028,6 +2014,8 @@ var Parser = (function () {
         if (options === void 0) { options = {}; }
         this.inlineParser = new InlineParser(options);
         this.options = options;
+        this.blocks = blocks;
+        this.blockStarts = blockStarts;
     }
     // The main parsing function.  Returns a parsed document AST.
     Parser.prototype.parse = function (input) {
@@ -2040,7 +2028,6 @@ var Parser = (function () {
         this.column = 0;
         this.lastMatchedContainer = this.doc;
         this.currentLine = "";
-        this.blockStarts = blockStarts;
         // if (this.options.time) { console.time("preparing input"); }
         var lines = input.split(reLineEnding);
         var len = lines.length;
