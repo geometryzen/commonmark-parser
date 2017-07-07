@@ -5,4 +5,4 @@ export declare const reHtmlTag: RegExp;
 export declare const ESCAPABLE = "[!\"#$%&'()*+,./:;<=>?@[\\\\\\]^_`{|}~-]";
 export declare const unescapeString: (s: string) => string;
 export declare const normalizeURI: (uri: string) => string;
-export declare const escapeXml: (s: string, preserve_entities: boolean) => string;
+export declare const escapeXml: (s: string, preserve_entities?: boolean) => string;

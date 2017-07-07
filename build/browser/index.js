@@ -584,6 +584,9 @@ var reHtmlTag = new RegExp('^' + HTMLTAG, 'i');
 var reBackslashOrAmp = /[\\&]/;
 var ESCAPABLE = '[!"#$%&\'()*+,./:;<=>?@[\\\\\\]^_`{|}~-]';
 var reEntityOrEscapedChar = new RegExp('\\\\' + ESCAPABLE + '|' + ENTITY, 'gi');
+var XMLSPECIAL = '[&<>"]';
+var reXmlSpecial = new RegExp(XMLSPECIAL, 'g');
+var reXmlSpecialOrEntity = new RegExp(ENTITY + '|' + XMLSPECIAL, 'gi');
 var unescapeChar = function (s) {
     if (s.charCodeAt(0) === C_BACKSLASH) {
         return s.charAt(1);
@@ -607,6 +610,33 @@ var normalizeURI = function (uri) {
     }
     catch (err) {
         return uri;
+    }
+};
+var replaceUnsafeChar = function (s) {
+    switch (s) {
+        case '&':
+            return '&amp;';
+        case '<':
+            return '&lt;';
+        case '>':
+            return '&gt;';
+        case '"':
+            return '&quot;';
+        default:
+            return s;
+    }
+};
+var escapeXml = function (s, preserve_entities) {
+    if (reXmlSpecial.test(s)) {
+        if (preserve_entities) {
+            return s.replace(reXmlSpecialOrEntity, replaceUnsafeChar);
+        }
+        else {
+            return s.replace(reXmlSpecial, replaceUnsafeChar);
+        }
+    }
+    else {
+        return s;
     }
 };
 
@@ -2342,9 +2372,527 @@ function Parser(options) {
 }
 */
 
+var Renderer = (function () {
+    function Renderer() {
+        // Do nothing
+    }
+    /**
+     *  Walks the AST and calls member methods for each Node type.
+     *
+     *  @param ast {Node} The root of the abstract syntax tree.
+     */
+    Renderer.prototype.render = function (ast) {
+        var walker = ast.walker();
+        var event;
+        this.buffer = '';
+        this.lastOut = '\n';
+        while ((event = walker.next())) {
+            var type = event.node.type;
+            switch (type) {
+                case 'document': {
+                    this.document(event.node, event.entering);
+                    break;
+                }
+                case 'paragraph': {
+                    this.paragraph(event.node, event.entering);
+                    break;
+                }
+                case 'text': {
+                    this.text(event.node, event.entering);
+                    break;
+                }
+                case 'emph': {
+                    this.emph(event.node, event.entering);
+                    break;
+                }
+                default: {
+                    throw new Error("TODO: " + type);
+                }
+            }
+            /*
+            if (this[type]) {
+                this[type](event.node, event.entering);
+            }
+            */
+        }
+        return this.buffer;
+    };
+    Renderer.prototype.document = function (node, entering) {
+        // Do nothing.
+    };
+    Renderer.prototype.paragraph = function (node, entering) {
+        // Do nothing.
+    };
+    Renderer.prototype.text = function (node, entering) {
+        // Do nothing.
+    };
+    Renderer.prototype.emph = function (node, entering) {
+        // Do nothing.
+    };
+    /**
+     *  Concatenate a literal string to the buffer.
+     */
+    Renderer.prototype.lit = function (str) {
+        this.buffer += str;
+        this.lastOut = str;
+    };
+    Renderer.prototype.cr = function () {
+        if (this.lastOut !== '\n') {
+            this.lit('\n');
+        }
+    };
+    /**
+     *  Concatenate a string to the buffer possibly escaping the content.
+     *
+     *  Concrete renderer implementations should override this method.
+     */
+    Renderer.prototype.out = function (str) {
+        this.lit(str);
+    };
+    return Renderer;
+}());
+
+/*! *****************************************************************************
+Copyright (c) Microsoft Corporation. All rights reserved.
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+this file except in compliance with the License. You may obtain a copy of the
+License at http://www.apache.org/licenses/LICENSE-2.0
+
+THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
+WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
+MERCHANTABLITY OR NON-INFRINGEMENT.
+
+See the Apache Version 2.0 License for specific language governing permissions
+and limitations under the License.
+***************************************************************************** */
+/* global Reflect, Promise */
+
+var extendStatics = Object.setPrototypeOf ||
+    ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+    function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+
+function __extends(d, b) {
+    extendStatics(d, b);
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+}
+
+var reUnsafeProtocol = /^javascript:|vbscript:|file:|data:/i;
+var reSafeDataProtocol = /^data:image\/(?:png|gif|jpeg|webp)/i;
+var potentiallyUnsafe = function (url) {
+    return reUnsafeProtocol.test(url) && !reSafeDataProtocol.test(url);
+};
+var HtmlRenderer = (function (_super) {
+    __extends(HtmlRenderer, _super);
+    function HtmlRenderer(options) {
+        if (options === void 0) { options = {}; }
+        var _this = _super.call(this) || this;
+        _this.options = options;
+        // by default, soft breaks are rendered as newlines in HTML
+        options.softbreak = options.softbreak || '\n';
+        // set to "<br />" to make them hard breaks
+        // set to " " if you want to ignore line wrapping in source
+        _this.disableTags = 0;
+        _this.lastOut = "\n";
+        _this.options = options;
+        return _this;
+    }
+    // Helper function to produce an HTML tag.
+    HtmlRenderer.prototype.tag = function (name, attrs, selfclosing) {
+        if (this.disableTags > 0) {
+            return;
+        }
+        this.buffer += ('<' + name);
+        if (attrs && attrs.length > 0) {
+            var i = 0;
+            var attrib = void 0;
+            while ((attrib = attrs[i]) !== undefined) {
+                this.buffer += (' ' + attrib[0] + '="' + attrib[1] + '"');
+                i++;
+            }
+        }
+        if (selfclosing) {
+            this.buffer += ' /';
+        }
+        this.buffer += '>';
+        this.lastOut = '>';
+    };
+    /* Node methods */
+    HtmlRenderer.prototype.text = function (node) {
+        this.out(node.literal);
+    };
+    HtmlRenderer.prototype.softbreak = function () {
+        this.lit(this.options.softbreak);
+    };
+    HtmlRenderer.prototype.linebreak = function () {
+        this.tag('br', [], true);
+        this.cr();
+    };
+    HtmlRenderer.prototype.link = function (node, entering) {
+        var attrs = this.attrs(node);
+        if (entering) {
+            if (!(this.options.safe && potentiallyUnsafe(node.destination))) {
+                attrs.push(['href', escapeXml(node.destination, true)]);
+            }
+            if (node.title) {
+                attrs.push(['title', escapeXml(node.title, true)]);
+            }
+            this.tag('a', attrs);
+        }
+        else {
+            this.tag('/a');
+        }
+    };
+    HtmlRenderer.prototype.image = function (node, entering) {
+        if (entering) {
+            if (this.disableTags === 0) {
+                if (this.options.safe &&
+                    potentiallyUnsafe(node.destination)) {
+                    this.lit('<img src="" alt="');
+                }
+                else {
+                    this.lit('<img src="' + escapeXml(node.destination, true) +
+                        '" alt="');
+                }
+            }
+            this.disableTags += 1;
+        }
+        else {
+            this.disableTags -= 1;
+            if (this.disableTags === 0) {
+                if (node.title) {
+                    this.lit('" title="' + escapeXml(node.title, true));
+                }
+                this.lit('" />');
+            }
+        }
+    };
+    HtmlRenderer.prototype.emph = function (node, entering) {
+        this.tag(entering ? 'em' : '/em');
+    };
+    HtmlRenderer.prototype.strong = function (node, entering) {
+        this.tag(entering ? 'strong' : '/strong');
+    };
+    HtmlRenderer.prototype.paragraph = function (node, entering) {
+        var grandparent = node.parent.parent;
+        var attrs = this.attrs(node);
+        if (grandparent !== null &&
+            grandparent.type === 'list') {
+            if (grandparent.listTight) {
+                return;
+            }
+        }
+        if (entering) {
+            this.cr();
+            this.tag('p', attrs);
+        }
+        else {
+            this.tag('/p');
+            this.cr();
+        }
+    };
+    HtmlRenderer.prototype.heading = function (node, entering) {
+        var tagname = 'h' + node.level;
+        var attrs = this.attrs(node);
+        if (entering) {
+            this.cr();
+            this.tag(tagname, attrs);
+        }
+        else {
+            this.tag('/' + tagname);
+            this.cr();
+        }
+    };
+    HtmlRenderer.prototype.code = function (node) {
+        this.tag('code');
+        this.out(node.literal);
+        this.tag('/code');
+    };
+    HtmlRenderer.prototype.code_block = function (node) {
+        var info_words = node.info ? node.info.split(/\s+/) : [];
+        var attrs = this.attrs(node);
+        if (info_words.length > 0 && info_words[0].length > 0) {
+            attrs.push(['class', 'language-' + escapeXml(info_words[0], true)]);
+        }
+        this.cr();
+        this.tag('pre');
+        this.tag('code', attrs);
+        this.out(node.literal);
+        this.tag('/code');
+        this.tag('/pre');
+        this.cr();
+    };
+    HtmlRenderer.prototype.thematic_break = function (node) {
+        var attrs = this.attrs(node);
+        this.cr();
+        this.tag('hr', attrs, true);
+        this.cr();
+    };
+    HtmlRenderer.prototype.block_quote = function (node, entering) {
+        var attrs = this.attrs(node);
+        if (entering) {
+            this.cr();
+            this.tag('blockquote', attrs);
+            this.cr();
+        }
+        else {
+            this.cr();
+            this.tag('/blockquote');
+            this.cr();
+        }
+    };
+    HtmlRenderer.prototype.list = function (node, entering) {
+        var tagname = node.listType === 'bullet' ? 'ul' : 'ol';
+        var attrs = this.attrs(node);
+        if (entering) {
+            var start = node.listStart;
+            if (start !== null && start !== 1) {
+                attrs.push(['start', start.toString()]);
+            }
+            this.cr();
+            this.tag(tagname, attrs);
+            this.cr();
+        }
+        else {
+            this.cr();
+            this.tag('/' + tagname);
+            this.cr();
+        }
+    };
+    HtmlRenderer.prototype.item = function (node, entering) {
+        var attrs = this.attrs(node);
+        if (entering) {
+            this.tag('li', attrs);
+        }
+        else {
+            this.tag('/li');
+            this.cr();
+        }
+    };
+    HtmlRenderer.prototype.html_inline = function (node) {
+        if (this.options.safe) {
+            this.lit('<!-- raw HTML omitted -->');
+        }
+        else {
+            this.lit(node.literal);
+        }
+    };
+    HtmlRenderer.prototype.html_block = function (node) {
+        this.cr();
+        if (this.options.safe) {
+            this.lit('<!-- raw HTML omitted -->');
+        }
+        else {
+            this.lit(node.literal);
+        }
+        this.cr();
+    };
+    HtmlRenderer.prototype.custom_inline = function (node, entering) {
+        if (entering && node.onEnter) {
+            this.lit(node.onEnter);
+        }
+        else if (!entering && node.onExit) {
+            this.lit(node.onExit);
+        }
+    };
+    HtmlRenderer.prototype.custom_block = function (node, entering) {
+        this.cr();
+        if (entering && node.onEnter) {
+            this.lit(node.onEnter);
+        }
+        else if (!entering && node.onExit) {
+            this.lit(node.onExit);
+        }
+        this.cr();
+    };
+    /* Helper methods */
+    HtmlRenderer.prototype.out = function (s) {
+        this.lit(escapeXml(s, false));
+    };
+    HtmlRenderer.prototype.attrs = function (node) {
+        var att = [];
+        if (this.options.sourcepos) {
+            var pos = node.sourcepos;
+            if (pos) {
+                att.push(['data-sourcepos', String(pos[0][0]) + ':' +
+                        String(pos[0][1]) + '-' + String(pos[1][0]) + ':' +
+                        String(pos[1][1])]);
+            }
+        }
+        return att;
+    };
+    return HtmlRenderer;
+}(Renderer));
+
+var reXMLTag = /\<[^>]*\>/;
+// Helper function to produce an XML tag.
+function tag(name, attrs, selfclosing) {
+    var result = '<' + name;
+    if (attrs && attrs.length > 0) {
+        var i = 0;
+        var attrib = void 0;
+        while ((attrib = attrs[i]) !== undefined) {
+            result += ' ' + attrib[0] + '="' + escapeXml(attrib[1]) + '"';
+            i++;
+        }
+    }
+    if (selfclosing) {
+        result += ' /';
+    }
+    result += '>';
+    return result;
+}
+function toTagName(s) {
+    return s.replace(/([a-z])([A-Z])/g, "$1_$2").toLowerCase();
+}
+var XmlRenderer = (function (_super) {
+    __extends(XmlRenderer, _super);
+    function XmlRenderer(options) {
+        if (options === void 0) { options = {}; }
+        var _this = _super.call(this) || this;
+        _this.options = options;
+        _this.disableTags = 0;
+        _this.lastOut = "\n";
+        _this.indentLevel = 0;
+        _this.indent = ' ';
+        _this.options = options;
+        return _this;
+    }
+    XmlRenderer.prototype.render = function (ast) {
+        this.buffer = '';
+        // var attrs;
+        // var tagname;
+        var walker = ast.walker();
+        var event;
+        // var event, node, entering;
+        // var container;
+        // var selfClosing;
+        // var nodetype;
+        var options = this.options;
+        this.buffer += '<?xml version="1.0" encoding="UTF-8"?>\n';
+        this.buffer += '<!DOCTYPE document SYSTEM "CommonMark.dtd">\n';
+        while ((event = walker.next())) {
+            var entering = event.entering;
+            var node = event.node;
+            var nodetype = node.type;
+            var container = node.isContainer;
+            var selfClosing = nodetype === 'thematic_break'
+                || nodetype === 'linebreak'
+                || nodetype === 'softbreak';
+            var tagname = toTagName(nodetype);
+            if (entering) {
+                var attrs = [];
+                switch (nodetype) {
+                    case 'document':
+                        attrs.push(['xmlns', 'http://commonmark.org/xml/1.0']);
+                        break;
+                    case 'list':
+                        if (node.listType !== null) {
+                            attrs.push(['type', node.listType.toLowerCase()]);
+                        }
+                        if (node.listStart !== null) {
+                            attrs.push(['start', String(node.listStart)]);
+                        }
+                        if (node.listTight !== null) {
+                            attrs.push(['tight', (node.listTight ? 'true' : 'false')]);
+                        }
+                        var delim = node.listDelimiter;
+                        if (delim !== null) {
+                            var delimword = '';
+                            if (delim === '.') {
+                                delimword = 'period';
+                            }
+                            else {
+                                delimword = 'paren';
+                            }
+                            attrs.push(['delimiter', delimword]);
+                        }
+                        break;
+                    case 'code_block':
+                        if (node.info) {
+                            attrs.push(['info', node.info]);
+                        }
+                        break;
+                    case 'heading':
+                        attrs.push(['level', String(node.level)]);
+                        break;
+                    case 'link':
+                    case 'image':
+                        attrs.push(['destination', node.destination]);
+                        attrs.push(['title', node.title]);
+                        break;
+                    case 'custom_inline':
+                    case 'custom_block':
+                        attrs.push(['on_enter', node.onEnter]);
+                        attrs.push(['on_exit', node.onExit]);
+                        break;
+                    default:
+                        break;
+                }
+                if (options.sourcepos) {
+                    var pos = node.sourcepos;
+                    if (pos) {
+                        attrs.push(['sourcepos', String(pos[0][0]) + ':' +
+                                String(pos[0][1]) + '-' + String(pos[1][0]) + ':' +
+                                String(pos[1][1])]);
+                    }
+                }
+                this.cr();
+                this.out(tag(tagname, attrs, selfClosing));
+                if (container) {
+                    this.indentLevel += 1;
+                }
+                else if (!container && !selfClosing) {
+                    var lit = node.literal;
+                    if (lit) {
+                        this.out(escapeXml(lit));
+                    }
+                    this.out(tag('/' + tagname));
+                }
+            }
+            else {
+                this.indentLevel -= 1;
+                this.cr();
+                this.out(tag('/' + tagname));
+            }
+        }
+        this.buffer += '\n';
+        return this.buffer;
+    };
+    /**
+     *
+     */
+    XmlRenderer.prototype.out = function (s) {
+        if (this.disableTags > 0) {
+            this.buffer += s.replace(reXMLTag, '');
+        }
+        else {
+            this.buffer += s;
+        }
+        this.lastOut = s;
+    };
+    /**
+     *
+     */
+    XmlRenderer.prototype.cr = function () {
+        if (this.lastOut !== '\n') {
+            this.buffer += '\n';
+            this.lastOut = '\n';
+            for (var i = this.indentLevel; i > 0; i--) {
+                this.buffer += this.indent;
+            }
+        }
+    };
+    return XmlRenderer;
+}(Renderer));
+
 exports.Node = Node;
 exports.NodeWalker = NodeWalker;
 exports.Parser = Parser;
+exports.Renderer = Renderer;
+exports.HtmlRenderer = HtmlRenderer;
+exports.XmlRenderer = XmlRenderer;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 

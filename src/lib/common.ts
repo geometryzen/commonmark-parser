@@ -79,7 +79,7 @@ const replaceUnsafeChar = function (s: string) {
     }
 };
 
-export const escapeXml = function (s: string, preserve_entities: boolean) {
+export const escapeXml = function (s: string, preserve_entities?: boolean) {
     if (reXmlSpecial.test(s)) {
         if (preserve_entities) {
             return s.replace(reXmlSpecialOrEntity, replaceUnsafeChar);
