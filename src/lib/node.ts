@@ -11,31 +11,33 @@ export interface ListData {
 
 export type SourcePos = [[number, number], [number, number]];
 
+export type NodeType = 'block_quote' | 'code' | 'code_block' | 'custom_block' | 'custom_inline' | 'document' | 'emph' | 'heading' | 'html_block' | 'html_inline' | 'image' | 'item' | 'linebreak' | 'link' | 'list' | 'paragraph' | 'softbreak' | 'strong' | 'text' | 'thematic_break';
+
 export class Node {
-    private _type: string;
-    private _parent: Node;
-    private _firstChild: Node;
-    private _lastChild: Node;
-    private _prev: Node;
-    private _next: Node;
-    private _sourcepos: SourcePos;
+    private _type: NodeType;
+    private _parent: Node | null;
+    private _firstChild: Node | null;
+    private _lastChild: Node | null;
+    private _prev: Node | null;
+    private _next: Node | null;
+    private _sourcepos?: SourcePos;
     public _lastLineBlank: boolean;
     public open: boolean;
-    public _string_content: string;
-    private _literal: any;
+    public _string_content: string | null;
+    private _literal: string | null;
     public listData: ListData;
-    private _info: any;
+    private _info: string | null;
     private _destination: any;
     private _title: any;
     public isFenced: boolean;
-    public fenceChar: string;
+    public fenceChar: string | null;
     public fenceLength: number;
-    public fenceOffset: number;
-    private _level: number;
-    private _onEnter: any;
-    private _onExit: any;
+    public fenceOffset: number | null;
+    private _level: number | null;
+    private _onEnter: string | null;
+    private _onExit: string | null;
     public htmlBlockType: number;
-    constructor(nodeType: string, sourcepos?: SourcePos) {
+    constructor(nodeType: NodeType, sourcepos?: SourcePos) {
         this._type = nodeType;
         this._parent = null;
         this._firstChild = null;
@@ -60,7 +62,7 @@ export class Node {
         this._onExit = null;
     }
     get isContainer() {
-        switch (this._type) {
+        switch (this.type) {
             case 'document':
             case 'block_quote':
             case 'list':
@@ -78,31 +80,31 @@ export class Node {
                 return false;
         }
     }
-    get type(): string {
+    get type(): NodeType {
         return this._type;
     }
-    get firstChild(): Node {
+    get firstChild(): Node | null {
         return this._firstChild;
     }
-    get lastChild(): Node {
+    get lastChild(): Node | null {
         return this._lastChild;
     }
-    get next(): Node {
+    get next(): Node | null {
         return this._next;
     }
-    get prev(): Node {
+    get prev(): Node | null {
         return this._prev;
     }
-    get parent(): Node {
+    get parent(): Node | null {
         return this._parent;
     }
-    get sourcepos(): any {
+    get sourcepos(): SourcePos | undefined {
         return this._sourcepos;
     }
-    get literal(): string {
+    get literal(): string | null {
         return this._literal;
     }
-    set literal(s: string) {
+    set literal(s: string | null) {
         this._literal = s;
     }
     get destination(): string {
@@ -117,16 +119,16 @@ export class Node {
     set title(s: string) {
         this._title = s;
     }
-    get info(): string {
+    get info(): string | null {
         return this._info;
     }
-    set info(s: string) {
+    set info(s: string | null) {
         this._info = s;
     }
-    get level(): number {
+    get level(): number | null {
         return this._level;
     }
-    set level(s: number) {
+    set level(s: number | null) {
         this._level = s;
     }
     get listType(): string {
@@ -135,34 +137,34 @@ export class Node {
     set listType(t: string) {
         this.listData.type = t;
     }
-    get listTight(): boolean {
+    get listTight(): boolean | undefined {
         return this.listData.tight;
     }
-    set listTight(tight: boolean) {
+    set listTight(tight: boolean | undefined) {
         this.listData.tight = tight;
     }
-    get listStart(): number {
+    get listStart(): number | undefined {
         return this.listData.start;
     }
-    set listStart(start: number) {
+    set listStart(start: number | undefined) {
         this.listData.start = start;
     }
-    get listDelimiter(): string {
+    get listDelimiter(): string | undefined {
         return this.listData.delimiter;
     }
-    set listDelimiter(delimiter: string) {
+    set listDelimiter(delimiter: string | undefined) {
         this.listData.delimiter = delimiter;
     }
-    get onEnter(): any {
+    get onEnter(): string | null {
         return this._onEnter;
     }
-    set onEnter(s: any) {
+    set onEnter(s: string | null) {
         this._onEnter = s;
     }
-    get onExit(): any {
+    get onExit(): string | null {
         return this._onExit;
     }
-    set onExit(s: any) {
+    set onExit(s: string | null) {
         this._onExit = s;
     }
     unlink() {
@@ -192,7 +194,6 @@ export class Node {
             this._lastChild = child;
         }
     }
-
     prependChild(child: Node) {
         child.unlink();
         child._parent = this;
@@ -205,7 +206,6 @@ export class Node {
             this._lastChild = child;
         }
     }
-
     insertAfter(sibling: Node) {
         sibling.unlink();
         sibling._next = this._next;
@@ -216,10 +216,11 @@ export class Node {
         this._next = sibling;
         sibling._parent = this._parent;
         if (!sibling._next) {
-            sibling._parent._lastChild = sibling;
+            if (sibling._parent) {
+                sibling._parent._lastChild = sibling;
+            }
         }
     }
-
     insertBefore(sibling: Node) {
         sibling.unlink();
         sibling._prev = this._prev;
@@ -230,10 +231,11 @@ export class Node {
         this._prev = sibling;
         sibling._parent = this._parent;
         if (!sibling._prev) {
-            sibling._parent._firstChild = sibling;
+            if (sibling._parent) {
+                sibling._parent._firstChild = sibling;
+            }
         }
     }
-
     walker() {
         const walker = new NodeWalker(this);
         return walker;
@@ -256,14 +258,14 @@ export interface NodeWalkerEvent {
 
  */
 export class NodeWalker {
-    current: Node;
+    current: Node | null;
     root: Node;
     entering = true;
     constructor(root: Node) {
         this.current = root;
         this.root = root;
     }
-    next(): NodeWalkerEvent {
+    next(): NodeWalkerEvent | null {
         const cur = this.current;
         const entering = this.entering;
 

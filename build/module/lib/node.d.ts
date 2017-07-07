@@ -8,6 +8,7 @@ export interface ListData {
     markerOffset?: number;
 }
 export declare type SourcePos = [[number, number], [number, number]];
+export declare type NodeType = 'block_quote' | 'code' | 'code_block' | 'custom_block' | 'custom_inline' | 'document' | 'emph' | 'heading' | 'html_block' | 'html_inline' | 'image' | 'item' | 'linebreak' | 'link' | 'list' | 'paragraph' | 'softbreak' | 'strong' | 'text' | 'thematic_break';
 export declare class Node {
     private _type;
     private _parent;
@@ -15,43 +16,43 @@ export declare class Node {
     private _lastChild;
     private _prev;
     private _next;
-    private _sourcepos;
+    private _sourcepos?;
     _lastLineBlank: boolean;
     open: boolean;
-    _string_content: string;
+    _string_content: string | null;
     private _literal;
     listData: ListData;
     private _info;
     private _destination;
     private _title;
     isFenced: boolean;
-    fenceChar: string;
+    fenceChar: string | null;
     fenceLength: number;
-    fenceOffset: number;
+    fenceOffset: number | null;
     private _level;
     private _onEnter;
     private _onExit;
     htmlBlockType: number;
-    constructor(nodeType: string, sourcepos?: SourcePos);
+    constructor(nodeType: NodeType, sourcepos?: SourcePos);
     readonly isContainer: boolean;
-    readonly type: string;
-    readonly firstChild: Node;
-    readonly lastChild: Node;
-    readonly next: Node;
-    readonly prev: Node;
-    readonly parent: Node;
-    readonly sourcepos: any;
-    literal: string;
+    readonly type: NodeType;
+    readonly firstChild: Node | null;
+    readonly lastChild: Node | null;
+    readonly next: Node | null;
+    readonly prev: Node | null;
+    readonly parent: Node | null;
+    readonly sourcepos: SourcePos | undefined;
+    literal: string | null;
     destination: string;
     title: string;
-    info: string;
-    level: number;
+    info: string | null;
+    level: number | null;
     listType: string;
-    listTight: boolean;
-    listStart: number;
-    listDelimiter: string;
-    onEnter: any;
-    onExit: any;
+    listTight: boolean | undefined;
+    listStart: number | undefined;
+    listDelimiter: string | undefined;
+    onEnter: string | null;
+    onExit: string | null;
     unlink(): void;
     appendChild(child: Node): void;
     prependChild(child: Node): void;
@@ -64,10 +65,10 @@ export interface NodeWalkerEvent {
     node: Node;
 }
 export declare class NodeWalker {
-    current: Node;
+    current: Node | null;
     root: Node;
     entering: boolean;
     constructor(root: Node);
-    next(): NodeWalkerEvent;
+    next(): NodeWalkerEvent | null;
     resumeAt(node: Node, entering: boolean): void;
 }

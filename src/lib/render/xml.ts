@@ -47,14 +47,8 @@ export class XmlRenderer extends Renderer {
 
         this.buffer = '';
 
-        // var attrs;
-        // var tagname;
         const walker: NodeWalker = ast.walker();
-        let event: NodeWalkerEvent;
-        // var event, node, entering;
-        // var container;
-        // var selfClosing;
-        // var nodetype;
+        let event: NodeWalkerEvent | null;
 
         const options = this.options;
 
@@ -118,8 +112,8 @@ export class XmlRenderer extends Renderer {
                         break;
                     case 'custom_inline':
                     case 'custom_block':
-                        attrs.push(['on_enter', node.onEnter]);
-                        attrs.push(['on_exit', node.onExit]);
+                        attrs.push(['on_enter', node.onEnter as string]);
+                        attrs.push(['on_exit', node.onExit as string]);
                         break;
                     default:
                         break;

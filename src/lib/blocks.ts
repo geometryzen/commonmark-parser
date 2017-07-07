@@ -1,4 +1,4 @@
-import { Node, ListData } from './node';
+import { Node, NodeType, ListData } from './node';
 
 import { OPENTAG, CLOSETAG, unescapeString } from './common';
 
@@ -84,7 +84,8 @@ const endsWithBlankLine = function (block: Node) {
         const t = block.type;
         if (t === 'list' || t === 'item') {
             block = block.lastChild;
-        } else {
+        }
+        else {
             break;
         }
     }
@@ -95,7 +96,7 @@ const endsWithBlankLine = function (block: Node) {
 // start, delimiter, bullet character, padding) or null.
 const parseListMarker = function (parser: Parser, container: Node) {
     const rest = parser.currentLine.slice(parser.nextNonspace);
-    let match: RegExpMatchArray;
+    let match: RegExpMatchArray | null;
     // var nextc;
     // var spacesStartCol;
     // var spacesStartOffset;
@@ -318,7 +319,8 @@ const blocks: { [type: string]: Block } = {
                 const rest = content.slice(newlinePos + 1);
                 block.info = unescapeString(firstLine.trim());
                 block.literal = rest;
-            } else { // indented
+            }
+            else { // indented
                 block.literal = block._string_content.replace(/(\n *)+$/, '\n');
             }
             block._string_content = null; // allow GC
@@ -852,7 +854,7 @@ export class Parser {
     // Add block of type tag as a child of the tip.  If the tip can't
     // accept children, close and finalize it and try its parent,
     // and so on til we find a block that can accept children.
-    addChild(tag: string, offset: number): Node {
+    addChild(tag: NodeType, offset: number): Node {
         while (!this.blocks[this.tip.type].canContain(tag)) {
             this.finalize(this.tip, this.lineNumber - 1);
         }

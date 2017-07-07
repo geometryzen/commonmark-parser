@@ -31,7 +31,7 @@ var Node = (function () {
     }
     Object.defineProperty(Node.prototype, "isContainer", {
         get: function () {
-            switch (this._type) {
+            switch (this.type) {
                 case 'document':
                 case 'block_quote':
                 case 'list':
@@ -264,7 +264,9 @@ var Node = (function () {
         this._next = sibling;
         sibling._parent = this._parent;
         if (!sibling._next) {
-            sibling._parent._lastChild = sibling;
+            if (sibling._parent) {
+                sibling._parent._lastChild = sibling;
+            }
         }
     };
     Node.prototype.insertBefore = function (sibling) {
@@ -277,7 +279,9 @@ var Node = (function () {
         this._prev = sibling;
         sibling._parent = this._parent;
         if (!sibling._prev) {
-            sibling._parent._firstChild = sibling;
+            if (sibling._parent) {
+                sibling._parent._firstChild = sibling;
+            }
         }
     };
     Node.prototype.walker = function () {
@@ -2397,12 +2401,68 @@ var Renderer = (function () {
                     this.paragraph(event.node, event.entering);
                     break;
                 }
+                case 'strong': {
+                    this.strong(event.node, event.entering);
+                    break;
+                }
                 case 'text': {
                     this.text(event.node, event.entering);
                     break;
                 }
                 case 'emph': {
                     this.emph(event.node, event.entering);
+                    break;
+                }
+                case 'block_quote': {
+                    this.block_quote(event.node, event.entering);
+                    break;
+                }
+                case 'code': {
+                    this.code(event.node, event.entering);
+                    break;
+                }
+                case 'code_block': {
+                    this.code_block(event.node, event.entering);
+                    break;
+                }
+                case 'image': {
+                    this.image(event.node, event.entering);
+                    break;
+                }
+                case 'linebreak': {
+                    this.linebreak(event.node, event.entering);
+                    break;
+                }
+                case 'list': {
+                    this.list(event.node, event.entering);
+                    break;
+                }
+                case 'item': {
+                    this.item(event.node, event.entering);
+                    break;
+                }
+                case 'thematic_break': {
+                    this.thematic_break(event.node, event.entering);
+                    break;
+                }
+                case 'html_block': {
+                    this.html_block(event.node, event.entering);
+                    break;
+                }
+                case 'html_inline': {
+                    this.html_inline(event.node, event.entering);
+                    break;
+                }
+                case 'heading': {
+                    this.heading(event.node, event.entering);
+                    break;
+                }
+                case 'link': {
+                    this.link(event.node, event.entering);
+                    break;
+                }
+                case 'softbreak': {
+                    this.softbreak(event.node, event.entering);
                     break;
                 }
                 default: {
@@ -2423,10 +2483,52 @@ var Renderer = (function () {
     Renderer.prototype.paragraph = function (node, entering) {
         // Do nothing.
     };
+    Renderer.prototype.strong = function (node, entering) {
+        // Do nothing.
+    };
     Renderer.prototype.text = function (node, entering) {
         // Do nothing.
     };
     Renderer.prototype.emph = function (node, entering) {
+        // Do nothing.
+    };
+    Renderer.prototype.block_quote = function (node, entering) {
+        // Do nothing.
+    };
+    Renderer.prototype.code = function (node, entering) {
+        // Do nothing.
+    };
+    Renderer.prototype.code_block = function (node, entering) {
+        // Do nothing.
+    };
+    Renderer.prototype.image = function (node, entering) {
+        // Do nothing.
+    };
+    Renderer.prototype.linebreak = function (node, entering) {
+        // Do nothing.
+    };
+    Renderer.prototype.link = function (node, entering) {
+        // Do nothing.
+    };
+    Renderer.prototype.list = function (node, entering) {
+        // Do nothing.
+    };
+    Renderer.prototype.item = function (node, entering) {
+        // Do nothing.
+    };
+    Renderer.prototype.thematic_break = function (node, entering) {
+        // Do nothing.
+    };
+    Renderer.prototype.html_block = function (node, entering) {
+        // Do nothing.
+    };
+    Renderer.prototype.html_inline = function (node, entering) {
+        // Do nothing.
+    };
+    Renderer.prototype.heading = function (node, entering) {
+        // Do nothing.
+    };
+    Renderer.prototype.softbreak = function (node, entering) {
         // Do nothing.
     };
     /**
@@ -2575,12 +2677,14 @@ var HtmlRenderer = (function (_super) {
         this.tag(entering ? 'strong' : '/strong');
     };
     HtmlRenderer.prototype.paragraph = function (node, entering) {
-        var grandparent = node.parent.parent;
         var attrs = this.attrs(node);
-        if (grandparent !== null &&
-            grandparent.type === 'list') {
-            if (grandparent.listTight) {
-                return;
+        if (node.parent) {
+            var grandparent = node.parent.parent;
+            if (grandparent !== null &&
+                grandparent.type === 'list') {
+                if (grandparent.listTight) {
+                    return;
+                }
             }
         }
         if (entering) {
@@ -2761,14 +2865,8 @@ var XmlRenderer = (function (_super) {
     }
     XmlRenderer.prototype.render = function (ast) {
         this.buffer = '';
-        // var attrs;
-        // var tagname;
         var walker = ast.walker();
         var event;
-        // var event, node, entering;
-        // var container;
-        // var selfClosing;
-        // var nodetype;
         var options = this.options;
         this.buffer += '<?xml version="1.0" encoding="UTF-8"?>\n';
         this.buffer += '<!DOCTYPE document SYSTEM "CommonMark.dtd">\n';

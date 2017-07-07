@@ -1,4 +1,4 @@
-import { Node } from './node';
+import { Node, NodeType } from './node';
 import { InlineParser, Reference } from './inlines';
 export interface ParserOptions {
     smart?: boolean;
@@ -37,6 +37,6 @@ export declare class Parser {
     finalize(block: Node, lineNumber: number): void;
     processInlines(block: Node): void;
     addLine(): void;
-    addChild(tag: string, offset: number): Node;
+    addChild(tag: NodeType, offset: number): Node;
     closeUnmatchedBlocks(): void;
 }

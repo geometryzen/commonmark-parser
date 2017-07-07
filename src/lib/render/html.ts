@@ -54,11 +54,11 @@ export class HtmlRenderer extends Renderer {
     /* Node methods */
 
     text(node: Node) {
-        this.out(node.literal);
+        this.out(node.literal as string);
     }
 
     softbreak() {
-        this.lit(this.options.softbreak);
+        this.lit(this.options.softbreak as string);
     }
 
     linebreak() {
@@ -114,18 +114,21 @@ export class HtmlRenderer extends Renderer {
     }
 
     paragraph(node: Node, entering: boolean) {
-        const grandparent = node.parent.parent;
         const attrs = this.attrs(node);
-        if (grandparent !== null &&
-            grandparent.type === 'list') {
-            if (grandparent.listTight) {
-                return;
+        if (node.parent) {
+            const grandparent = node.parent.parent;
+            if (grandparent !== null &&
+                grandparent.type === 'list') {
+                if (grandparent.listTight) {
+                    return;
+                }
             }
         }
         if (entering) {
             this.cr();
             this.tag('p', attrs);
-        } else {
+        }
+        else {
             this.tag('/p');
             this.cr();
         }
@@ -145,7 +148,7 @@ export class HtmlRenderer extends Renderer {
 
     code(node: Node) {
         this.tag('code');
-        this.out(node.literal);
+        this.out(node.literal as string);
         this.tag('/code');
     }
 
@@ -158,7 +161,7 @@ export class HtmlRenderer extends Renderer {
         this.cr();
         this.tag('pre');
         this.tag('code', attrs);
-        this.out(node.literal);
+        this.out(node.literal as string);
         this.tag('/code');
         this.tag('/pre');
         this.cr();
@@ -216,8 +219,9 @@ export class HtmlRenderer extends Renderer {
     html_inline(node: Node) {
         if (this.options.safe) {
             this.lit('<!-- raw HTML omitted -->');
-        } else {
-            this.lit(node.literal);
+        }
+        else {
+            this.lit(node.literal as string);
         }
     }
 
@@ -225,8 +229,9 @@ export class HtmlRenderer extends Renderer {
         this.cr();
         if (this.options.safe) {
             this.lit('<!-- raw HTML omitted -->');
-        } else {
-            this.lit(node.literal);
+        }
+        else {
+            this.lit(node.literal as string);
         }
         this.cr();
     }
