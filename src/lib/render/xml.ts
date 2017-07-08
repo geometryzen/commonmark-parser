@@ -131,7 +131,8 @@ export class XmlRenderer extends Renderer {
                 this.out(tag(tagname, attrs, selfClosing));
                 if (container) {
                     this.indentLevel += 1;
-                } else if (!container && !selfClosing) {
+                }
+                else if (!container && !selfClosing) {
                     const lit = node.literal;
                     if (lit) {
                         this.out(esc(lit));
@@ -153,7 +154,8 @@ export class XmlRenderer extends Renderer {
     out(s: string): void {
         if (this.disableTags > 0) {
             this.buffer += s.replace(reXMLTag, '');
-        } else {
+        }
+        else {
             this.buffer += s;
         }
         this.lastOut = s;

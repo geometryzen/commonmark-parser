@@ -1,5 +1,6 @@
 import { Parser } from './blocks';
 import { HtmlRenderer } from './render/html';
+import { TexRenderer } from './render/tex';
 import { XmlRenderer } from './render/xml';
 
 describe("Parser", function () {
@@ -577,6 +578,21 @@ describe("Parser", function () {
         const result = writer.render(parsed);
         it("render", function () {
             expect(result).toBe('<p>Hello <em>World</em></p>\n');
+        });
+    });
+    describe("Tex", function () {
+        const reader = new Parser();
+        const writer = new TexRenderer();
+        const parsed = reader.parse("Hello *World*");
+        const result = writer.render(parsed);
+        it("render", function () {
+            const targetText = [
+                '\\documentclass{article}',
+                '\\begin{document}',
+                'Hello \\emph{World}',
+                '\\end{document}'
+            ].join('\n');
+            expect(result).toBe(targetText + '\n');
         });
     });
     describe("XML", function () {

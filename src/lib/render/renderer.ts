@@ -107,75 +107,75 @@ export abstract class Renderer {
     }
 
     document(node: Node, entering: boolean) {
-        // Do nothing.
+        throw new Error(`${node.type}`);
     }
 
     paragraph(node: Node, entering: boolean) {
-        // Do nothing.
+        throw new Error(`${node.type}`);
     }
 
     strong(node: Node, entering: boolean) {
-        // Do nothing.
+        throw new Error(`${node.type}`);
     }
 
     text(node: Node, entering: boolean) {
-        // Do nothing.
+        throw new Error(`${node.type}`);
     }
 
     emph(node: Node, entering: boolean) {
-        // Do nothing.
+        throw new Error(`${node.type}`);
     }
 
     block_quote(node: Node, entering: boolean) {
-        // Do nothing.
+        throw new Error(`${node.type}`);
     }
 
     code(node: Node, entering: boolean) {
-        // Do nothing.
+        throw new Error(`${node.type}`);
     }
 
     code_block(node: Node, entering: boolean) {
-        // Do nothing.
+        throw new Error(`${node.type}`);
     }
 
     image(node: Node, entering: boolean) {
-        // Do nothing.
+        throw new Error(`${node.type}`);
     }
 
     linebreak(node: Node, entering: boolean) {
-        // Do nothing.
+        throw new Error(`${node.type}`);
     }
 
     link(node: Node, entering: boolean) {
-        // Do nothing.
+        throw new Error(`${node.type}`);
     }
 
     list(node: Node, entering: boolean) {
-        // Do nothing.
+        throw new Error(`${node.type}`);
     }
 
     item(node: Node, entering: boolean) {
-        // Do nothing.
+        throw new Error(`${node.type}`);
     }
 
     thematic_break(node: Node, entering: boolean) {
-        // Do nothing.
+        throw new Error(`${node.type}`);
     }
 
     html_block(node: Node, entering: boolean) {
-        // Do nothing.
+        throw new Error(`${node.type}`);
     }
 
     html_inline(node: Node, entering: boolean) {
-        // Do nothing.
+        throw new Error(`${node.type}`);
     }
 
     heading(node: Node, entering: boolean) {
-        // Do nothing.
+        throw new Error(`${node.type}`);
     }
 
     softbreak(node: Node, entering: boolean) {
-        // Do nothing.
+        throw new Error(`${node.type}`);
     }
 
     /**

@@ -52,6 +52,9 @@ export class HtmlRenderer extends Renderer {
     }
 
     /* Node methods */
+    document(node: Node, entering: boolean) {
+        // Do nothing.
+    }
 
     text(node: Node) {
         this.out(node.literal as string);

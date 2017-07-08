@@ -10,6 +10,7 @@ export declare class HtmlRenderer extends Renderer {
     disableTags: number;
     constructor(options?: HtmlRendererOptions);
     tag(name: string, attrs?: string[][], selfclosing?: boolean): void;
+    document(node: Node, entering: boolean): void;
     text(node: Node): void;
     softbreak(): void;
     linebreak(): void;

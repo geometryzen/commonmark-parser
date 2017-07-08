@@ -2478,58 +2478,58 @@ var Renderer = (function () {
         return this.buffer;
     };
     Renderer.prototype.document = function (node, entering) {
-        // Do nothing.
+        throw new Error("" + node.type);
     };
     Renderer.prototype.paragraph = function (node, entering) {
-        // Do nothing.
+        throw new Error("" + node.type);
     };
     Renderer.prototype.strong = function (node, entering) {
-        // Do nothing.
+        throw new Error("" + node.type);
     };
     Renderer.prototype.text = function (node, entering) {
-        // Do nothing.
+        throw new Error("" + node.type);
     };
     Renderer.prototype.emph = function (node, entering) {
-        // Do nothing.
+        throw new Error("" + node.type);
     };
     Renderer.prototype.block_quote = function (node, entering) {
-        // Do nothing.
+        throw new Error("" + node.type);
     };
     Renderer.prototype.code = function (node, entering) {
-        // Do nothing.
+        throw new Error("" + node.type);
     };
     Renderer.prototype.code_block = function (node, entering) {
-        // Do nothing.
+        throw new Error("" + node.type);
     };
     Renderer.prototype.image = function (node, entering) {
-        // Do nothing.
+        throw new Error("" + node.type);
     };
     Renderer.prototype.linebreak = function (node, entering) {
-        // Do nothing.
+        throw new Error("" + node.type);
     };
     Renderer.prototype.link = function (node, entering) {
-        // Do nothing.
+        throw new Error("" + node.type);
     };
     Renderer.prototype.list = function (node, entering) {
-        // Do nothing.
+        throw new Error("" + node.type);
     };
     Renderer.prototype.item = function (node, entering) {
-        // Do nothing.
+        throw new Error("" + node.type);
     };
     Renderer.prototype.thematic_break = function (node, entering) {
-        // Do nothing.
+        throw new Error("" + node.type);
     };
     Renderer.prototype.html_block = function (node, entering) {
-        // Do nothing.
+        throw new Error("" + node.type);
     };
     Renderer.prototype.html_inline = function (node, entering) {
-        // Do nothing.
+        throw new Error("" + node.type);
     };
     Renderer.prototype.heading = function (node, entering) {
-        // Do nothing.
+        throw new Error("" + node.type);
     };
     Renderer.prototype.softbreak = function (node, entering) {
-        // Do nothing.
+        throw new Error("" + node.type);
     };
     /**
      *  Concatenate a literal string to the buffer.
@@ -2621,6 +2621,9 @@ var HtmlRenderer = (function (_super) {
         this.lastOut = '>';
     };
     /* Node methods */
+    HtmlRenderer.prototype.document = function (node, entering) {
+        // Do nothing.
+    };
     HtmlRenderer.prototype.text = function (node) {
         this.out(node.literal);
     };
@@ -2829,6 +2832,45 @@ var HtmlRenderer = (function (_super) {
     return HtmlRenderer;
 }(Renderer));
 
+var TexRenderer = (function (_super) {
+    __extends(TexRenderer, _super);
+    function TexRenderer(options) {
+        if (options === void 0) { options = {}; }
+        var _this = _super.call(this) || this;
+        _this.options = options;
+        // Do nothing yet.
+        _this.options = options;
+        return _this;
+    }
+    TexRenderer.prototype.document = function (node, entering) {
+        if (entering) {
+            this.buffer += '\\documentclass{article}\n';
+            this.buffer += '\\begin{document}\n';
+        }
+        else {
+            this.cr();
+            this.buffer += '\\end{document}\n';
+        }
+    };
+    TexRenderer.prototype.paragraph = function (node, entering) {
+        if (entering) {
+            this.cr();
+        }
+    };
+    TexRenderer.prototype.text = function (node, entering) {
+        this.out(node.literal);
+    };
+    TexRenderer.prototype.emph = function (node, entering) {
+        if (entering) {
+            this.buffer += '\\emph{';
+        }
+        else {
+            this.buffer += '}';
+        }
+    };
+    return TexRenderer;
+}(Renderer));
+
 var reXMLTag = /\<[^>]*\>/;
 // Helper function to produce an XML tag.
 function tag(name, attrs, selfclosing) {
@@ -2990,6 +3032,7 @@ exports.NodeWalker = NodeWalker;
 exports.Parser = Parser;
 exports.Renderer = Renderer;
 exports.HtmlRenderer = HtmlRenderer;
+exports.TexRenderer = TexRenderer;
 exports.XmlRenderer = XmlRenderer;
 
 Object.defineProperty(exports, '__esModule', { value: true });
