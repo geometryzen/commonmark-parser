@@ -1,6 +1,6 @@
 {
-  "name": "markdown-tools",
-  "version": "0.0.1",
+  "name": "markdown-ts",
+  "version": "0.0.2",
   "description": "Markdown parsing and rendering library written in TypeScript.",
   "author": {
     "name": "David Holmes",
@@ -12,22 +12,22 @@
   "types": "./build/module/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "git://github.com/geometryzen/markdown-tools.git"
+    "url": "git://github.com/geometryzen/markdown-ts.git"
   },
   "bugs": {
-    "url": "https://github.com/geometryzen/markdown-tools/issues"
+    "url": "https://github.com/geometryzen/markdown-ts/issues"
   },
   "license": "MIT",
   "licenses": [
     {
       "type": "MIT",
-      "url": "https://github.com/geometryzen/markdown-tools/blob/master/LICENSE"
+      "url": "https://github.com/geometryzen/markdown-ts/blob/master/LICENSE"
     }
   ],
   "scripts": {
     "info": "npm-scripts-info",
     "build": "trash build && tsc -p tsconfig.main.json && tsc -p tsconfig.module.json && yarn build:browser",
-    "build:browser": "rollup --config rollup.config.js --format umd --name 'commonmarkParser' --output build/browser/index.js && sorcery -i build/browser/index.js && cp src/index.d.ts build/browser",
+    "build:browser": "rollup --config rollup.config.js --format umd --name 'markdownTs' --output build/browser/index.js && sorcery -i build/browser/index.js && cp src/index.d.ts build/browser",
     "lint": "tslint src/**/*.ts",
     "unit": "trash test && tsc -p tsconfig.json && karma start",
     "test": "yarn lint && yarn unit && nyc check-coverage --lines 40 --functions 30 --branches 20",

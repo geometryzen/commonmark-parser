@@ -1,4 +1,4 @@
-# markdown-tools
+# markdown-ts
 
 Library supporting markdown parsing and rendering written in TypeScript.
 
