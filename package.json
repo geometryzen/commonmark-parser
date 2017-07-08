@@ -1,7 +1,7 @@
 {
-  "name": "commonmark-parser",
-  "version": "0.9.12",
-  "description": "CommonMark Markdown parser in TypeScript.",
+  "name": "markdown-tools",
+  "version": "0.0.1",
+  "description": "Markdown parsing and rendering library written in TypeScript.",
   "author": {
     "name": "David Holmes",
     "email": "david.geo.holmes@gmail.com"
@@ -12,16 +12,16 @@
   "types": "./build/module/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "git://github.com/geometryzen/commonmark-parser.git"
+    "url": "git://github.com/geometryzen/markdown-tools.git"
   },
   "bugs": {
-    "url": "https://github.com/geometryzen/commonmark-parser/issues"
+    "url": "https://github.com/geometryzen/markdown-tools/issues"
   },
   "license": "MIT",
   "licenses": [
     {
       "type": "MIT",
-      "url": "https://github.com/geometryzen/commonmark-parser/blob/master/LICENSE"
+      "url": "https://github.com/geometryzen/markdown-tools/blob/master/LICENSE"
     }
   ],
   "scripts": {
