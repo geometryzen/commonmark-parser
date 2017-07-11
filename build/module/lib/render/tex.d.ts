@@ -7,6 +7,7 @@ export declare class TexRenderer extends Renderer {
     constructor(options?: TexRendererOptions);
     document(node: Node, entering: boolean): void;
     paragraph(node: Node, entering: boolean): void;
+    code_block(node: Node, entering: boolean): void;
     text(node: Node, entering: boolean): void;
     emph(node: Node, entering: boolean): void;
 }

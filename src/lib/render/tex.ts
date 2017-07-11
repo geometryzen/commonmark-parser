@@ -28,6 +28,12 @@ export class TexRenderer extends Renderer {
             this.cr();
         }
     }
+    code_block(node: Node, entering: boolean) {
+        this.cr();
+        this.buffer += '\\begin{equation}\n';
+        this.out(node.literal as string);
+        this.buffer += '\\end{equation}';
+    }
     text(node: Node, entering: boolean) {
         this.out(node.literal as string);
     }

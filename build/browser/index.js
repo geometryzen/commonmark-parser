@@ -2857,6 +2857,12 @@ var TexRenderer = (function (_super) {
             this.cr();
         }
     };
+    TexRenderer.prototype.code_block = function (node, entering) {
+        this.cr();
+        this.buffer += '\\begin{equation}\n';
+        this.out(node.literal);
+        this.buffer += '\\end{equation}';
+    };
     TexRenderer.prototype.text = function (node, entering) {
         this.out(node.literal);
     };
