@@ -5,6 +5,8 @@ import { XmlRenderer } from './render/xml';
 
 const sourceText = [
     'Hello *World*',
+    '',
+    'Code blocks do not induce paragraphs',
     '```latex',
     'f(x) = \\sqrt{x}',
     'g(x) = x^2',
@@ -21,6 +23,7 @@ describe("Parser", function () {
         it("render", function () {
             const targetText = [
                 '<p>Hello <em>World</em></p>',
+                '<p>Code blocks do not induce paragraphs</p>',
                 '<pre><code class="language-latex">f(x) = \\sqrt{x}',
                 'g(x) = x^2',
                 '</code></pre>',
@@ -37,7 +40,8 @@ describe("Parser", function () {
             const targetText = [
                 '\\documentclass{article}',
                 '\\begin{document}',
-                'Hello \\emph{World}',
+                '\\paragraph{•}Hello \\emph{World}',
+                '\\paragraph{•}Code blocks do not induce paragraphs',
                 '\\begin{equation}',
                 'f(x) = \\sqrt{x}',
                 'g(x) = x^2',
@@ -62,6 +66,9 @@ describe("Parser", function () {
                 '  <emph>',
                 '   <text>World</text>',
                 '  </emph>',
+                ' </paragraph>',
+                ' <paragraph>',
+                '  <text>Code blocks do not induce paragraphs</text>',
                 ' </paragraph>',
                 ' <code_block info="latex">f(x) = \\sqrt{x}',
                 'g(x) = x^2',

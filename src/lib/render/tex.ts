@@ -26,6 +26,7 @@ export class TexRenderer extends Renderer {
     paragraph(node: Node, entering: boolean) {
         if (entering) {
             this.cr();
+            this.buffer += '\\paragraph{•}';
         }
     }
     code_block(node: Node, entering: boolean) {
