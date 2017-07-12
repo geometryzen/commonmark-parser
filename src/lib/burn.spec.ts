@@ -40,8 +40,8 @@ describe("Parser", function () {
             const targetText = [
                 '\\documentclass{article}',
                 '\\begin{document}',
-                '\\paragraph{•}Hello \\emph{World}',
-                '\\paragraph{•}Code blocks do not induce paragraphs',
+                '\\paragraph{}Hello \\emph{World}',
+                '\\paragraph{}Code blocks do not induce paragraphs',
                 '\\begin{equation}',
                 'f(x) = \\sqrt{x}',
                 'g(x) = x^2',

@@ -2855,7 +2855,7 @@ var TexRenderer = (function (_super) {
     TexRenderer.prototype.paragraph = function (node, entering) {
         if (entering) {
             this.cr();
-            this.buffer += '\\paragraph{•}';
+            this.buffer += '\\paragraph{}';
         }
     };
     TexRenderer.prototype.code_block = function (node, entering) {
